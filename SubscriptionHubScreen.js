@@ -41,12 +41,31 @@ export default function SubscriptionHubScreen({ navigation }) {
     }
   };
 
+  const sendSubscriptionSMS = async () => {
+    const selectedSensorDetails = sensors.filter(sensor => selectedSensors.includes(sensor.sensor_id));
+    const message = selectedSensorDetails.map(sensor => `Sensor ID: ${sensor.sensor_id}, Type: ${sensor.sensor_type}`).join('; ');
+    const fullMessage = `You successfully subscribed to the following sensors: ${message}`;
+
+    try {
+      await axios.post('https://api.dialog.lk/sms/send', {
+        message: fullMessage,
+        destinationAddresses: ["tel:94703988668"], 
+        password: "YOUR_SMS_API_PASSWORD", 
+        applicationId: "APP_064990" 
+      });
+    } catch (error) {
+      console.error("Error sending SMS:", error);
+      Alert.alert("Error", "Unable to send subscription SMS.");
+    }
+  };
+
   const handleSubscribePress = () => {
     if (selectedSensors.length === 0) {
       Alert.alert("Notice", "Please select at least one sensor before subscribing.");
       return;
     }
     fetchDataForSelectedSensors();
+    sendSubscriptionSMS();
   };
 
   return (
