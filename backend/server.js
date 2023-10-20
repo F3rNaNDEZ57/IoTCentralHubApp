@@ -30,6 +30,17 @@ app.get('/sensors', async (req, res) => {
     }
 });
 
+// Endpoint to fetch sensor Locations (latitude and longtitude)
+app.get('/location', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT sensor_id,latitude,longitude FROM sensors;');
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Database error:", err);
+        res.status(300).send('Server error1');
+    }
+});
+
 // New endpoint to fetch the data of specific sensors from the last 10 days
 app.post('/sensorData', async (req, res) => {
     const sensorIds = req.body.sensorIds; 
