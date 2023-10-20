@@ -1,67 +1,86 @@
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, ScrollView } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 
 export default function DashboardScreen({ route }) {
-  const { sensorData } = route.params;
+  const sensorData = route.params?.sensorData || [];
 
-  // Grouping data by sensor_id and sensor_type for the chart title
-  const groupedData = sensorData.reduce((acc, item) => {
-    if (!acc[item.sensor_id]) {
-      acc[item.sensor_id] = {
-        sensor_type: item.sensor_type,
-        timestamps: [item.timestamp],
-        values: [item.value]
-      };
-    } else {
-      acc[item.sensor_id].timestamps.push(item.timestamp);
-      acc[item.sensor_id].values.push(item.value);
+  // Group the data by sensor_id
+  const groupedData = sensorData.reduce((acc, datum) => {
+    if (!acc[datum.sensor_id]) {
+      acc[datum.sensor_id] = [];
     }
+    acc[datum.sensor_id].push(datum);
     return acc;
   }, {});
 
-  const chartWidth = Dimensions.get("window").width - 30;
+  const formatDateHour = (timestamp) => {
+    const date = new Date(timestamp);
+    return `${date.getDate()}/${date.getMonth() + 1} ${date.getHours()}:00`;
+  };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Analytical Dashboard</Text>
-      {Object.keys(groupedData).map(sensorId => {
-        const data = {
-          labels: groupedData[sensorId].timestamps,
-          datasets: [
-            {
-              data: groupedData[sensorId].values,
-            },
-          ],
-        };
-        return (
-          <View key={sensorId} style={styles.chartContainer}>
-            <Text>{sensorId} - {groupedData[sensorId].sensor_type}</Text>
-            <LineChart
-              data={data}
-              width={chartWidth}
-              height={220}
-              chartConfig={{
-                backgroundColor: '#e26a00',
-                backgroundGradientFrom: '#fb8c00',
-                backgroundGradientTo: '#ffa726',
-                decimalPlaces: 2,
-                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-              }}
-              bezier
-              style={styles.chart}
-            />
-          </View>
-        );
-      })}
-    </View>
+    <ScrollView style={styles.scrollContainer}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Analytical Dashboard</Text>
+        {Object.keys(groupedData).map(sensorId => {
+          const dataForSensor = groupedData[sensorId];
+          const labels = dataForSensor.map(d => formatDateHour(d.timestamp));
+          const values = dataForSensor.map(d => d.value);
+
+          return (
+            <View key={sensorId} style={styles.chartContainer}>
+              <Text style={styles.chartTitle}>
+                {sensorId} - {dataForSensor[0].sensor_type}
+              </Text>
+              <LineChart
+                data={{
+                    labels: labels,
+                    datasets: [
+                    {
+                        data: values,
+                    },
+                    ],
+                }}
+                width={Dimensions.get('window').width - 40}
+                height={220}
+                yAxisLabel=""
+                chartConfig={{
+                    backgroundColor: '#ffffff',
+                    backgroundGradientFrom: '#ffffff',
+                    backgroundGradientTo: '#ffffff',
+                    decimalPlaces: 2,
+                    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                    style: {
+                    borderRadius: 16,
+                    },
+                    propsForDots: {
+                    r: '3',
+                    },
+                }}
+                xLabelsOffset={15}
+                yLabelsOffset={15}
+                labelRotation={90}
+                bezier
+                style={{
+                    marginVertical: 8,
+                    borderRadius: 16,
+                }}
+                />
+            </View>
+          );
+        })}
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  scrollContainer: {
     flex: 1,
+  },
+  container: {
     alignItems: 'center',
     paddingHorizontal: 10,
   },
@@ -70,10 +89,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   chartContainer: {
-    marginTop: 20,
     marginBottom: 20,
   },
-  chart: {
-    marginVertical: 8,
+  chartTitle: {
+    fontSize: 18,
+    marginBottom: 10,
   },
 });
