@@ -5,6 +5,7 @@ const cors = require('cors');
 const app = express();
 
 app.use(cors());
+app.use(express.json()); // Middleware to parse JSON
 
 // PostgreSQL connection setup
 const pool = new Pool({
@@ -17,7 +18,6 @@ const pool = new Pool({
         rejectUnauthorized: false
     }
 });
-
 
 // Endpoint to fetch sensor data
 app.get('/sensors', async (req, res) => {
@@ -32,7 +32,7 @@ app.get('/sensors', async (req, res) => {
 
 // New endpoint to fetch the data of specific sensors from the last 10 days
 app.post('/sensorData', async (req, res) => {
-    const sensorIds = req.body.sensorIds; // expecting an array of sensor_ids
+    const sensorIds = req.body.sensorIds; 
 
     if (!sensorIds || sensorIds.length === 0) {
         return res.status(400).send('No sensorIds provided');
@@ -50,7 +50,6 @@ app.post('/sensorData', async (req, res) => {
         res.status(500).send('Server error');
     }
 });
-
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

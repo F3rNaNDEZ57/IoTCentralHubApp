@@ -30,7 +30,7 @@ export default function SubscriptionHubScreen({ navigation }) {
 
   const fetchDataForSelectedSensors = async () => {
     try {
-      const response = await axios.post('https://tadhack-readdb.onrender.com/sensors', {
+      const response = await axios.post('https://tadhack-readdb.onrender.com/sensorData', {
         sensorIds: selectedSensors,
       });
       const sensorData = response.data;
