@@ -40,7 +40,7 @@ app.post('/sensorData', async (req, res) => {
 
     try {
         const result = await pool.query(`
-            SELECT * FROM your_data_table_name
+            SELECT * FROM sensor_data
             WHERE sensor_id = ANY($1::text[]) AND timestamp >= NOW() - interval '10 days'
             ORDER BY timestamp DESC;
         `, [sensorIds]);
