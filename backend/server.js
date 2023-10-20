@@ -30,6 +30,27 @@ app.get('/sensors', async (req, res) => {
     }
 });
 
+// New endpoint to fetch the data of specific sensors from the last 10 days
+app.post('/sensorData', async (req, res) => {
+    const sensorIds = req.body.sensorIds; // expecting an array of sensor_ids
+
+    if (!sensorIds || sensorIds.length === 0) {
+        return res.status(400).send('No sensorIds provided');
+    }
+
+    try {
+        const result = await pool.query(`
+            SELECT * FROM your_data_table_name
+            WHERE sensor_id = ANY($1::text[]) AND timestamp >= NOW() - interval '10 days'
+            ORDER BY timestamp DESC;
+        `, [sensorIds]);
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Database error:", err);
+        res.status(500).send('Server error');
+    }
+});
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

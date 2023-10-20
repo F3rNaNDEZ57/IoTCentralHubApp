@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, Button, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Button, TouchableOpacity, Alert } from 'react-native';
 import axios from 'axios';
 
 export default function SubscriptionHubScreen({ navigation }) {
@@ -28,12 +28,33 @@ export default function SubscriptionHubScreen({ navigation }) {
     });
   };
 
+  const fetchDataForSelectedSensors = async () => {
+    try {
+      const response = await axios.post('https://tadhack-readdb.onrender.com/sensors', {
+        sensorIds: selectedSensors,
+      });
+      const sensorData = response.data;
+      navigation.navigate('Dashboard', { sensorData: sensorData });
+    } catch (error) {
+      console.error("Error fetching data for selected sensors:", error);
+      Alert.alert("Error", "Unable to fetch data for selected sensors.");
+    }
+  };
+
+  const handleSubscribePress = () => {
+    if (selectedSensors.length === 0) {
+      Alert.alert("Notice", "Please select at least one sensor before subscribing.");
+      return;
+    }
+    fetchDataForSelectedSensors();
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Subscription Hub</Text>
       <FlatList
         data={sensors}
-        keyExtractor={(item) => item.sensor_id}
+        keyExtractor={(item) => item.sensor_id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity 
             style={[
@@ -49,7 +70,7 @@ export default function SubscriptionHubScreen({ navigation }) {
           </TouchableOpacity>
         )}
       />
-      <Button title="SUBSCRIBE" onPress={() => navigation.navigate('Dashboard')} />
+      <Button title="SUBSCRIBE" onPress={handleSubscribePress} />
     </View>
   );
 }
@@ -73,8 +94,8 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   selectedSensorItem: {
-    backgroundColor: '#a3c9a8', // A green color to indicate selection, you can adjust this
-    borderColor: '#389638', // Darker green border for visibility
+    backgroundColor: '#a3c9a8',
+    borderColor: '#389638',
     borderWidth: 1,
   },
 });
