@@ -49,8 +49,8 @@ export default function SubscriptionHubScreen({ navigation }) {
     try {
       await axios.post('https://api.dialog.lk/sms/send', {
         message: fullMessage,
-        destinationAddresses: ["tel:94703988668"], 
-        password: "YOUR_SMS_API_PASSWORD", 
+        destinationAddresses: ["tel:94772726961"], 
+        password: "ade49a19b550a168415764f273f49fc5", 
         applicationId: "APP_064990" 
       });
     } catch (error) {
